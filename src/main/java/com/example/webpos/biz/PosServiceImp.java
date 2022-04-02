@@ -44,7 +44,19 @@ public class PosServiceImp implements PosService, Serializable {
         Product product = posDB.getProduct(productId);
         if (product == null) return cart;
 
-        cart.addItem(new Item(product, amount));
+        //TODO: product maybe already exist in the list ; amount maybe negative --> maybe remove the item
+        Item item = cart.getItemById(productId);
+        if (item == null) cart.addItem(new Item(product, amount));
+        else {//product already exist
+            int newAmount = amount + item.getQuantity();
+            if (newAmount > 0) {
+                cart.removeItem(item);
+                cart.addItem(new Item(product, amount + item.getQuantity()));
+                return cart;
+            }
+            else if(newAmount == 0) cart.removeItem(item);
+            else return cart;//newAmount < 0, failed
+        }
         return cart;
     }
 

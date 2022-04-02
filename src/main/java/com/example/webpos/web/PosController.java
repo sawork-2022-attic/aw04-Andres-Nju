@@ -14,14 +14,25 @@ import javax.servlet.http.HttpSession;
 @Controller
 public class PosController {
 
+    @Autowired
+    private HttpSession session;
+
     private PosService posService;
 
-    private Cart cart;
-
-    @Autowired
-    public void setCart(Cart cart) {
-        this.cart = cart;
+    private Cart getCart() {
+        Cart cart = (Cart) session.getAttribute("cart");
+        if (cart == null) {
+            cart = new Cart();
+            this.saveCart(cart);
+            ;
+        }
+        return cart;
     }
+
+    private void saveCart(Cart cart) {
+        session.setAttribute("cart", cart);
+    }
+
 
     @Autowired
     public void setPosService(PosService posService) {
@@ -31,15 +42,31 @@ public class PosController {
     @GetMapping("/")
     public String pos(Model model) {
         model.addAttribute("products", posService.products());
-        model.addAttribute("cart", cart);
+        model.addAttribute("cart", getCart());
         return "index";
     }
 
     @GetMapping("/add")
     public String addByGet(@RequestParam(name = "pid") String pid, Model model) {
-        posService.add(cart, pid, 1);
+        saveCart(posService.add(getCart(), pid, 1));
         model.addAttribute("products", posService.products());
-        model.addAttribute("cart", cart);
+        model.addAttribute("cart", getCart());
+        return "index";
+    }
+
+    @GetMapping("/minus")
+    public String minus(@RequestParam(name="pid") String pid, Model model){
+        saveCart(posService.add(getCart(), pid, -1));
+        model.addAttribute("products", posService.products());
+        model.addAttribute("cart", getCart());
+        return "index";
+    }
+
+    @GetMapping("/cancel")
+    public String cancel(Model model){
+        getCart().emptyCart();
+        model.addAttribute("products", posService.products());
+        model.addAttribute("cart", getCart());
         return "index";
     }
 }

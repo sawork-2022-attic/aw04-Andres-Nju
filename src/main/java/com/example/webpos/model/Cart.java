@@ -9,14 +9,30 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@Component
-@SessionScope
 public class Cart implements Serializable {
 
     private List<Item> items = new ArrayList<>();
 
     public boolean addItem(Item item) {
         return items.add(item);
+    }
+
+    //TODO:remove item
+    public boolean removeItem(Item item){
+        return items.remove(item);
+    }
+    //TODO:empty the items
+    public void emptyCart(){
+        this.items.clear();
+    }
+    //TODO:get certain item by id from list of items
+    public Item getItemById(String id_){
+        for (Item item : items){
+            if (item.getProduct().getId().equals(id_)){
+                return item;
+            }
+        }
+        return null;
     }
 
     public double getTotal() {
